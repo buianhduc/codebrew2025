@@ -1,0 +1,3 @@
+/Users/ducbui/Documents/Coding/codebrew/cmake-build-debug/CMakeFiles/codebrew.dir
+/Users/ducbui/Documents/Coding/codebrew/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/ducbui/Documents/Coding/codebrew/cmake-build-debug/CMakeFiles/rebuild_cache.dir
