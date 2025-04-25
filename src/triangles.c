@@ -2,7 +2,9 @@
 
 #include <math.h>
 #include <stdlib.h>
-
+/***
+ * Create a 3-dimension vector
+ */
 vec3_t vec3(double x, double y, double z) {
 	vec3_t p;
 	p.x = x;
