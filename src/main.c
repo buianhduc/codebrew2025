@@ -1,56 +1,61 @@
 #include "pixel_grid.h"
 #include "triangles.h"
 #include <stdbool.h>
+#include "cube.h"
 
 Tigr* window;
 Tigr* gScreen;
 
-// Where to draw the red pixel
-int red_pixel_x = 240, red_pixel_y = 200;
-
-triangle_t tri;
-
 vec3_t camera_position;
-vec3_t camera_rotation;
+double camera_x_rotation;
+double camera_y_rotation;
 
+mesh_t cube;
+
+#include <stdio.h>
 // Runs 60 times per second
 // Can be used for timers, simulation state updates, etc.
 void tick_state() {
-	if (tigrKeyHeld(window, TK_DOWN)){
-		camera_position.z += 0.01;
-	} else if (tigrKeyHeld( window, TK_UP)){
-		camera_position.z -= 0.01;
-	} else if (tigrKeyHeld( window, TK_RIGHT)){
-		camera_position.x -= 0.01;
-	} else if (tigrKeyHeld( window, TK_LEFT)){
-		camera_position.x += 0.01;
+	vec2_t impulse = vec2(0, 0);
+
+	if (tigrKeyHeld(window, 83)){
+		impulse.y += 0.01;
+	} else if (tigrKeyHeld( window, 87)){
+		impulse.y -= 0.01;
+	} else if (tigrKeyHeld( window, 68)){
+		impulse.x += 0.01;
+	} else if (tigrKeyHeld( window, 65)){
+		impulse.x -= 0.01;
+	}
+
+	camera_position.x += impulse.x * cos(camera_y_rotation) + impulse.y * sin(camera_y_rotation);
+	camera_position.z += impulse.y * cos(camera_y_rotation) - impulse.x * sin(camera_y_rotation);
+
+	if (tigrKeyHeld(window, TK_LEFT)) {
+		camera_y_rotation += 0.01;
+	} else if (tigrKeyHeld(window, TK_RIGHT)) {
+		camera_y_rotation -= 0.01;
 	}
 }
 
 void render_state() {
+	set_view_matrix(&camera_position, camera_x_rotation, camera_y_rotation);
 
-	
-	set_view_matrix(&camera_position, 0, 0);
-
-
-	render_triangle(&tri);
+	render_mesh(&cube);
 }
 
 void initialize(){
-	camera_position = vec3(0, 0, 0);
-	camera_rotation = vec3(0, 0, 0);
+	camera_position = vec3(0, 0, 2);
+	camera_x_rotation = 0;
+	camera_y_rotation = 0;
 
 	initialize_matrices();
 
-	vec3_t p1 = vec3(0.0, 1.0 , -2.0);
-	vec3_t p2 = vec3(1.0, -1.0 , -2.0);
-	vec3_t p3 = vec3(-1.0, -1.0 , -2.0);
+	cube = make_cube();
+}
 
-	vertex_t v1 = make_basic_vertex(&p1);
-	vertex_t v2 = make_basic_vertex(&p2);
-	vertex_t v3 = make_basic_vertex(&p3);
-
-	tri = make_triangle(&v1, &v2, &v3);
+void cleanup() {
+	free_mesh(&cube);
 }
 
 int main(int argc, char* argv[]) {
@@ -74,6 +79,8 @@ int main(int argc, char* argv[]) {
 
         tigrUpdate(window);
     }
+
+	cleanup();
 
     tigrFree(window);
 
