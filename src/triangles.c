@@ -34,14 +34,14 @@ void draw_point(vec4_t *p){
 
 void render_triangle(triangle_t *tri){
 
-    //here
+    mat4x4_t matrix = mat4x4_multiply_mat4x4(&projection_matrix, &view_matrix);
 
     //get position of the vertices on screen 
-    vec4_t p1 = mat4x4_multiply(&projection_matrix,
+    vec4_t p1 = mat4x4_multiply(&matrix,
        tri->vertices[0].position);
-    vec4_t p2 = mat4x4_multiply(&projection_matrix,
+    vec4_t p2 = mat4x4_multiply(&matrix,
         tri->vertices[1].position);
-    vec4_t p3 = mat4x4_multiply(&projection_matrix,
+    vec4_t p3 = mat4x4_multiply(&matrix,
         tri->vertices[2].position);
 
     draw_point(&p1);
@@ -59,5 +59,7 @@ void set_view_matrix(vec3_t * p, double x_rotation, double y_rotation) {
     mat4x4_t x_rotate = make_rotation_matrix_x(x_rotation);
     mat4x4_t y_rotate = make_rotation_matrix_x(y_rotation);
 
-    //view_matrix = y_rotate * x_rotate * translate (write multiply matrices method)
+    view_matrix = mat4x4_multiply_mat4x4(&x_rotate, &y_rotate);
+    view_matrix = mat4x4_multiply_mat4x4(&translate, &view_matrix);
 }
+

@@ -18,6 +18,12 @@ vec3_t camera_rotation;
 void tick_state() {
 	if (tigrKeyHeld(window, TK_DOWN)){
 		camera_position.z += 0.01;
+	} else if (tigrKeyHeld( window, TK_UP)){
+		camera_position.z -= 0.01;
+	} else if (tigrKeyHeld( window, TK_RIGHT)){
+		camera_position.x -= 0.01;
+	} else if (tigrKeyHeld( window, TK_LEFT)){
+		camera_position.x += 0.01;
 	}
 }
 

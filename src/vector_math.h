@@ -135,6 +135,16 @@ static inline vec4_t mat4x4_multiply(mat4x4_t* m, vec4_t p){
 	return result;
 }
 
+static inline mat4x4_t mat4x4_multiply_mat4x4(mat4x4_t* m, mat4x4_t* p){
+	mat4x4_t results;
+	results.v1 = mat4x4_multiply(m, p->v1);
+	results.v2 = mat4x4_multiply(m, p->v2);
+	results.v3 = mat4x4_multiply(m, p->v3);
+	results.v4 = mat4x4_multiply(m, p->v4);
+
+	return results;
+}
+
 
 
 #endif
