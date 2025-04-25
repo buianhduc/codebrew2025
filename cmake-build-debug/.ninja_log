@@ -1,8 +1,0 @@
-# ninja log v5
-2	145	1745511783293714579	CMakeFiles/codebrew.dir/src/triangles.c.o	e15125eb69530e59
-2	278	1745511783427023953	CMakeFiles/codebrew.dir/lib/tigr.c.o	93233ac93fed3d80
-2	146	1745511783294963193	CMakeFiles/codebrew.dir/src/main.c.o	388eae7f9e345187
-2	133	1745511783282019352	CMakeFiles/codebrew.dir/src/ray.c.o	85f171eea754ddca
-2	122	1745511783268965096	CMakeFiles/codebrew.dir/src/cube.c.o	dc101dc90b0c1c36
-1	52	1745511812110622761	build.ninja	df64f1492cf30606
-2	48	1745511812110622761	build.ninja	df64f1492cf30606
