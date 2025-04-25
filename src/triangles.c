@@ -61,4 +61,3 @@ void set_view_matrix(vec3_t * p, double x_rotation, double y_rotation) {
 
     //view_matrix = y_rotate * x_rotate * translate (write multiply matrices method)
 }
-

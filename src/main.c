@@ -72,4 +72,3 @@ int main(int argc, char* argv[]) {
     tigrFree(window);
 
 	return 0;
-}
