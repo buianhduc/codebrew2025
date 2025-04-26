@@ -6,6 +6,8 @@
 #include "../include/tigr.h"
 #include "pixel_grid.h"
 #include "vector.h"
+#include "../include/fast_obj.h"
+
 
 mat4x4_t projection_matrix;
 mat4x4_t view_matrix;
@@ -128,102 +130,153 @@ void set_view_matrix(vec3_t *p, double x_rotation, double y_rotation)
     view_matrix = mat4x4_multiply_mat4x4(&x_rotate, &view_matrix);
 }
 
-mesh_t* load_object_from_file(char *filePath, mesh_t *mesh)
+// mesh_t* load_object_from_file(char *filePath, mesh_t *mesh, bool fullVersion)
+// {
+//     FILE *file = fopen(filePath, "r");
+//     if (file == NULL)
+//     {
+//         printf("Impossible to open the file !\n");
+//         return NULL;
+//     }
+//     int cnt = 0;
+
+//     Array_Vec3 position;
+//     Array_Vec2 textureCoords;
+//     Array_Vec3 normals;
+//     Array_int vertexIndices, uvIndices, normalIndices;
+//     // Initialize the arrays
+//     initArrayVec3(&position, 1);
+//     initArrayVec2(&textureCoords, 1);
+//     initArrayVec3(&normals, 1);
+//     initArrayInt(&vertexIndices, 1);
+//     initArrayInt(&uvIndices, 1);
+//     initArrayInt(&normalIndices, 1);
+//     int triangles_count =0;
+//     int vertex_count = 0;
+//     while (true)
+//     {
+//         char lineHeader[128];
+//         int res = fscanf(file, "%s", lineHeader);
+//         if (res == EOF)
+//             break;
+//         if (strcmp(lineHeader, "v") == 0)
+//         {
+//             vertex_count++;
+//             vec3_t vertex;
+//             fscanf(file, "%lf %lf %lf\n", &vertex.x, &vertex.y, &vertex.z);
+//             insertArrayVec3(&position, vertex);
+//         }
+//         else if (strcmp(lineHeader, "vt") == 0)
+//         {
+//             vec2_t uv;
+//             fscanf(file, "%lf %lf\n", &uv.x, &uv.y);
+//             insertArrayVec2(&textureCoords, uv);
+//         }
+//         else if (strcmp(lineHeader, "vn") == 0)
+//         {
+//             vec3_t normal;
+//             fscanf(file, "%lf %lf %lf\n", &normal.x, &normal.y, &normal.z);
+//             insertArrayVec3(&normals, normal);
+//         }
+//         else if (strcmp(lineHeader, "f") == 0)
+//         {
+//             triangles_count++;
+//             int vertexIndex[3], uvIndex[3], normalIndex[3];
+//             if (fullVersion) {
+//                 int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n",
+//                                 &vertexIndex[0], &uvIndex[0], &normalIndex[0],
+//                                 &vertexIndex[1], &uvIndex[1], &normalIndex[1],
+//                                 &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+//                 if (matches != 9) return false;
+//             }
+
+//             else {
+//                 int matches = fscanf(file, "%d %d %d\n",
+//                     &vertexIndex[0],// &uvIndex[0], &normalIndex[0],
+//                     &vertexIndex[1],// &uvIndex[1], &normalIndex[1],
+//                     &vertexIndex[2]);// &uvIndex[2], &normalIndex[2]);
+//                 if (matches != 3) return false;
+//             }
+
+//             insertArrayInt(&vertexIndices, vertexIndex[0]-1);
+//             insertArrayInt(&vertexIndices, vertexIndex[1]-1);
+//             insertArrayInt(&vertexIndices, vertexIndex[2]-1);
+
+//             if(fullVersion) {
+//                 insertArrayInt(&uvIndices, uvIndex[0] - 1);
+//                 insertArrayInt(&uvIndices, uvIndex[1] - 1) ;
+//                 insertArrayInt(&uvIndices, uvIndex[2] - 1);
+
+//                 insertArrayInt(&normalIndices, normalIndex[0] - 1);
+//                 insertArrayInt(&normalIndices, normalIndex[1] - 1);
+//                 insertArrayInt(&normalIndices, normalIndex[2] - 1);
+//             }
+//         }
+//     }
+
+//     mesh = (mesh_t *)malloc(sizeof(mesh_t));
+//     mesh->triangle_count = triangles_count;
+//     mesh->triangles = (triangle_t*)malloc(sizeof(triangle_t)*triangles_count);
+//     mesh->vertex_count = vertex_count;
+//     mesh->vertices = (vertex_t*)malloc(sizeof(vertex_t)*vertex_count);
+//     for (int i = 0; i < vertex_count; i++) {
+//         mesh->vertices[i] = make_vertex(position.array[i], vec2(0,0), vec3(0,0,0));
+//     }
+//     cnt = 0;
+//     for (int i = 0; i < vertexIndices.used-2; i+=3) {
+//         mesh->triangles[cnt++] = make_triangle(&mesh->vertices[vertexIndices.array[i]], &mesh->vertices[vertexIndices.array[i+1]], &mesh->vertices[vertexIndices.array[i+2]]);
+//     }
+//     printf("Mesh's triangle counts is: %d\n", triangles_count);
+//     printf("Mesh's vertices counts is: %d\n", vertex_count);
+//     for (int i = 0; i < mesh->triangle_count; i++) {
+//         printf("Vertex %d: %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", i,
+//             mesh->triangles[i].vertices[0]->position.x, mesh->triangles[i].vertices[0]->position.y, mesh->triangles[i].vertices[0]->position.z,
+//             mesh->triangles[i].vertices[1]->position.x, mesh->triangles[i].vertices[1]->position.y, mesh->triangles[i].vertices[1]->position.z,
+//             mesh->triangles[i].vertices[2]->position.x, mesh->triangles[i].vertices[2]->position.y, mesh->triangles[i].vertices[2]->position.z);
+//     }
+//     return mesh;
+// }
+
+mesh_t* convert_from_fast_object_mesh(fastObjMesh obj, mesh_t* mesh) {
+    mesh = (mesh_t*)malloc(sizeof(mesh_t));
+    mesh->triangle_count = obj.face_count;
+    mesh->triangles = (triangle_t*)malloc(sizeof(mesh));
+    mesh->vertex_count = obj.index_count+1;
+    mesh->vertices = (vertex_t*) malloc(mesh->vertex_count*sizeof(vertex_t));
+    int cnt = 0, cnt2 = 0;
+    int surface_count = 0;
+    for (int i = 0; i < (obj.index_count); i++) {
+        surface_count ++;
+        
+        vec3_t positions = vec3(
+            (double)obj.positions[(obj.indices[i].p)*(3)],
+            (double)obj.positions[(obj.indices[i].p)*(3)+1],
+            (double)obj.positions[(obj.indices[i].p)*3+2]
+        );
+        vec2_t uv = obj.texcoord_count > 1 ? vec2(
+            (double)obj.texcoords[(obj.indices[i].t)*(2)],
+            (double)obj.positions[(obj.indices[i].t)*(2)+1]
+        ) : vec2(0,0);
+        
+        vec3_t normal = obj.normal_count > 1 ? vec3(
+            (double)obj.normals[(obj.indices[i].n)*(3)],
+            (double)obj.normals[(obj.indices[i].n)*(3)+1],
+            (double)obj.normals[(obj.indices[i].n)*3+2]
+        ) : vec3(0,0,0);
+        mesh->vertices[cnt++] = make_vertex(positions, uv, normal);
+        printf("error at %d, surface count: %d, cnt: %d, cnt2: %d\n",i, surface_count, cnt, cnt2);
+        if (surface_count == 3) {
+            surface_count = 0;
+            mesh->triangles[cnt2++] = make_triangle(&mesh->vertices[cnt-3],&mesh->vertices[cnt-2],&mesh->vertices[cnt-1]);
+        }
+    }
+    return mesh;
+}
+mesh_t *load_object_from_file(char *filePath, mesh_t *mesh, bool fullVersion)
 {
-    FILE *file = fopen(filePath, "r");
-    if (file == NULL)
-    {
-        printf("Impossible to open the file !\n");
-        return NULL;
-    }
-    int cnt = 0;
+    fastObjMesh* meshRead = fast_obj_read(filePath);
     
-    Array_Vec3 position;
-    Array_Vec2 textureCoords;
-    Array_Vec3 normals;
-    Array_int vertexIndices, uvIndices, normalIndices;
-    // Initialize the arrays
-    initArrayVec3(&position, 1);
-    initArrayVec2(&textureCoords, 1);
-    initArrayVec3(&normals, 1);
-    initArrayInt(&vertexIndices, 1);
-    initArrayInt(&uvIndices, 1);
-    initArrayInt(&normalIndices, 1);
-    int triangles_count =0;
-    int vertex_count = 0;
-    while (true)
-    {
-        char lineHeader[128];
-        int res = fscanf(file, "%s", lineHeader);
-        if (res == EOF)
-            break;
-        if (strcmp(lineHeader, "v") == 0)
-        {
-            vertex_count++;
-            vec3_t vertex;
-            fscanf(file, "%lf %lf %lf\n", &vertex.x, &vertex.y, &vertex.z);
-            insertArrayVec3(&position, vertex);
-        }
-        else if (strcmp(lineHeader, "vt") == 0)
-        {
-            vec2_t uv;
-            fscanf(file, "%lf %lf\n", &uv.x, &uv.y);
-            insertArrayVec2(&textureCoords, uv);
-        }
-        else if (strcmp(lineHeader, "vn") == 0)
-        {
-            vec3_t normal;
-            fscanf(file, "%lf %lf %lf\n", &normal.x, &normal.y, &normal.z);
-            insertArrayVec3(&normals, normal);
-        }
-        else if (strcmp(lineHeader, "f") == 0)
-        {
-            triangles_count++;
-            int vertexIndex[3], uvIndex[3], normalIndex[3];
-            // int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n",
-            //                      &vertexIndex[0], &uvIndex[0], &normalIndex[0],
-            //                      &vertexIndex[1], &uvIndex[1], &normalIndex[1],
-            //                      &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
-            // if (matches != 9) return false;
-
-            int matches = fscanf(file, "%d %d %d\n",
-                &vertexIndex[0],// &uvIndex[0], &normalIndex[0],
-                &vertexIndex[1],// &uvIndex[1], &normalIndex[1],
-                &vertexIndex[2]);// &uvIndex[2], &normalIndex[2]);
-            if (matches != 3) return false;
-            insertArrayInt(&vertexIndices, vertexIndex[0]-1);
-            insertArrayInt(&vertexIndices, vertexIndex[1]-1);
-            insertArrayInt(&vertexIndices, vertexIndex[2]-1);
-            
-            // insertArrayInt(&uvIndices, uvIndex[0] - 1);
-            // insertArrayInt(&uvIndices, uvIndex[1] - 1) ;
-            // insertArrayInt(&uvIndices, uvIndex[2] - 1);
-
-            // insertArrayInt(&normalIndices, normalIndex[0] - 1);
-            // insertArrayInt(&normalIndices, normalIndex[1] - 1);
-            // insertArrayInt(&normalIndices, normalIndex[2] - 1);
-        }
-    }
-
-    mesh = (mesh_t *)malloc(sizeof(mesh_t));
-    mesh->triangle_count = triangles_count;
-    mesh->triangles = (triangle_t*)malloc(sizeof(triangle_t)*triangles_count);
-    mesh->vertex_count = vertex_count;
-    mesh->vertices = (vertex_t*)malloc(sizeof(vertex_t)*vertex_count);
-    for (int i = 0; i < vertex_count; i++) {
-        mesh->vertices[i] = make_vertex(position.array[i], vec2(0,0), vec3(0,0,0));
-    }
-    cnt = 0;
-    for (int i = 0; i < vertexIndices.used-2; i+=3) {
-        mesh->triangles[cnt++] = make_triangle(&mesh->vertices[vertexIndices.array[i]], &mesh->vertices[vertexIndices.array[i+1]], &mesh->vertices[vertexIndices.array[i+2]]);
-    }
-    printf("Mesh's triangle counts is: %d\n", triangles_count);
-    printf("Mesh's vertices counts is: %d\n", vertex_count);
-    for (int i = 0; i < mesh->triangle_count; i++) {
-        printf("Vertex %d: %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", i, 
-            mesh->triangles[i].vertices[0]->position.x, mesh->triangles[i].vertices[0]->position.y, mesh->triangles[i].vertices[0]->position.z,
-            mesh->triangles[i].vertices[1]->position.x, mesh->triangles[i].vertices[1]->position.y, mesh->triangles[i].vertices[1]->position.z,
-            mesh->triangles[i].vertices[2]->position.x, mesh->triangles[i].vertices[2]->position.y, mesh->triangles[i].vertices[2]->position.z);
-    }
+    mesh = convert_from_fast_object_mesh(*meshRead, mesh);
+    
     return mesh;
 }

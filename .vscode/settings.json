@@ -37,6 +37,12 @@
         "variant": "c",
         "vector": "c",
         "complex": "c",
-        "cstdio": "c"
+        "cstdio": "c",
+        "ios": "c",
+        "tinyobj_loader_c.h": "c",
+        "tigr.h": "c",
+        "math.h": "c",
+        "triangles.h": "c",
+        "fast_obj.h": "c"
     }
 }

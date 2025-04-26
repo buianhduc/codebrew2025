@@ -2,6 +2,11 @@
 #define TRIANGLES_H
 #include "vector_math.h"
 #include <stdbool.h>
+#include "../include/tigr.h"
+#include "pixel_grid.h"
+#include "vector.h"
+#include "../include/fast_obj.h"
+#define FAST_OBJ_IMPLEMENTATION
 
 // Vertex in 3D space
 typedef struct {
@@ -58,5 +63,5 @@ void free_mesh(mesh_t *mesh);
 void render_mesh(mesh_t *mesh);
 void render_triangle(triangle_t *tri);
 void set_view_matrix(vec3_t *p, double x_rotation, double y_rotation);
-mesh_t* load_object_from_file(char* filePath, mesh_t* mesh);
+mesh_t* load_object_from_file(char* filePath, mesh_t* mesh,  bool fullVersion);
 #endif
