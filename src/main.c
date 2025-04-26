@@ -89,16 +89,16 @@ void render_state() {
 
 	render_mesh(&ground, &floor_tex, vec3(0, 0, 0), vec3(0, 0, 0));
 	// render_mesh(&cube, &cobblestone, vec3(3, 0, 3), vec3(0, 0, 0));
-	render_mesh(&cube, &cobblestone, vec3(0, 0, 0), vec3(0, time_seconds, 0));
-	// render_mesh(&cat, &cat_tex, vec3(0, -0.5, 0), vec3(0, time_seconds, 0));
+	// render_mesh(&cube, &cobblestone, vec3(0, 0, 0), vec3(0, time_seconds, 0));
+	render_mesh(&cat, &cat_tex, vec3(0, -0.5, 0), vec3(0, time_seconds, 0));
 
-	// for (int i = 0; i < 5; i++) {
-	// 	double t = time_seconds + i * 2.5;
-	// 	vec3_t fish_pos = vec3(0, 0, 0);
-	// 	fish_pos.x = cos(t * 0.5) * 1.5;
-	// 	fish_pos.z = sin(t * 0.5) * 1.5;
-	// 	render_mesh(&fish, NULL, fish_pos, vec3(0, -t * 0.5, 0));
-	// }
+	for (int i = 0; i < 5; i++) {
+		double t = time_seconds + i * 2.5;
+		vec3_t fish_pos = vec3(0, 0, 0);
+		fish_pos.x = cos(t * 0.5) * 1.5;
+		fish_pos.z = sin(t * 0.5) * 1.5;
+		render_mesh(&fish, NULL, fish_pos, vec3(0, -t * 0.5, 0));
+	}
 
 	post_process();
 }
