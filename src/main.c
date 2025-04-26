@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "cube.h"
 #include "texture.h"
+#include "lighting.h"
 
 Tigr* window;
 Tigr* gScreen;
@@ -56,6 +57,20 @@ void tick_state() {
 	}
 }
 
+// Reduce colours to RGB332 and add retro dithering
+void post_process() {
+	for (int y = 0; y < PIXEL_GRID_HEIGHT; y++) {
+		for (int x = 0; x < PIXEL_GRID_WIDTH; x++) {
+			int dither = ((x + y) % 2) << 0;
+			TPixel pix = tigrGet(gScreen, x, y);
+			pix.r = (pix.r + dither) >> 3 << 3;
+			pix.g = (pix.g + dither) >> 3 << 3;
+			pix.b = (pix.b + dither) >> 2 << 2;
+			tigrPlot(gScreen, x, y, pix);
+		}
+	}
+}
+
 void render_state() {
 	clear_z_buffer();
 	set_view_matrix(&camera_position, camera_x_rotation, camera_y_rotation);
@@ -63,6 +78,8 @@ void render_state() {
 	render_mesh(&ground, &cobblestone);
 	render_mesh(&cube1, &cobblestone);
 	render_mesh(&cube2, &cobblestone);
+
+	post_process();
 }
 
 void initialize(){
@@ -70,7 +87,8 @@ void initialize(){
 	camera_x_rotation = 0;
 	camera_y_rotation = 0;
 
-	initialize_matrices();
+	initialize_rendering();
+	initialize_lighting();
 
 	cube1 = make_cube(vec3(0, 0, 0));
 	cube2 = make_cube(vec3(-3, 0, -2));
@@ -98,9 +116,14 @@ int main(int argc, char* argv[]) {
 	gScreen = tigrBitmap(PIXEL_GRID_WIDTH, PIXEL_GRID_HEIGHT);
 
     while (!tigrClosed(window) && !tigrKeyDown(window, TK_ESCAPE)) {
-        tigrClear(gScreen, tigrRGB(0, 0, 0));
+		// ensure that tick_state() is called 60 times per second
+		float unprocessed_time = tigrTime();
+		while (unprocessed_time > 0) {
+			tick_state();
+			unprocessed_time -= 1.0f / 60.0f;
+		}
 
-		tick_state();
+        tigrClear(gScreen, tigrRGB(0, 0, 0));
 		render_state();
 
 		tigrBlit(window, gScreen, 0, 0, 0, 0, PIXEL_GRID_WIDTH, PIXEL_GRID_HEIGHT);

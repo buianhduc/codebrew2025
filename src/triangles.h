@@ -23,7 +23,7 @@ typedef struct {
 	unsigned int triangle_count;
 } mesh_t;
 
-void initialize_matrices();
+void initialize_rendering();
 void clear_z_buffer();
 
 //use pointers for optimisation 

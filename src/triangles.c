@@ -4,6 +4,7 @@
 #include "triangles.h"
 #include "tigr.h"
 #include "pixel_grid.h"
+#include "lighting.h"
 
 #define min3(a, b, c) (a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c))
 #define max3(a, b, c) (a) > (b) ? ((a) > (c) ? (a) : (c)) : ((b) > (c) ? (b) : (c))
@@ -13,15 +14,13 @@ double zBuffer[PIXEL_GRID_WIDTH * PIXEL_GRID_HEIGHT];
 mat4x4_t projection_matrix;
 mat4x4_t view_matrix;
 
-vec3_t sun;
-
 void clear_z_buffer() {
     for (int i = 0; i < PIXEL_GRID_WIDTH * PIXEL_GRID_HEIGHT; i++) {
         zBuffer[i] = 9999999999;
     }
 }
 
-void initialize_matrices() {
+void initialize_rendering() {
     clear_z_buffer();
 
     double a = 320/240.0;
@@ -31,9 +30,6 @@ void initialize_matrices() {
     projection_matrix = make_projection_matrix(a, fov, z_near, z_far);
 
     load_identity(&view_matrix);
-
-    sun = vec3(-6, -10, 8);
-    normalize(&sun);
 }
 
 void free_mesh(mesh_t *mesh) {
@@ -96,24 +92,23 @@ void render_clipped_triangle(vertex_t *v1, vertex_t *v2, vertex_t *v3, texture_t
                     weight_a * normal_a->z + weight_b * normal_b->z + weight_c * normal_c->z
                 );
 
-                double dot = sun.x * normal.x + sun.y * normal.y + sun.z * normal.z;
-                double brightness = 0.25;
-                if (dot > 0) {
-                    brightness = dot;
-                }
-                brightness *= 1.5;
-                if (brightness > 1) {
-                    brightness = 1;
-                }
+                double directional_brightness = apply_directional_light(normal);
+                double point_light_brightness = 0;
 
                 int xp = (int) p.x;
                 int yp = (int) p.y;
 
+                vec3_t pos;
+                pos.x = weight_a * v1->position.x + weight_b * v2->position.x + weight_c * v3->position.x;
+                pos.y = weight_a * v1->position.y + weight_b * v2->position.y + weight_c * v3->position.y;
                 double inv_z = weight_a / v1->position.z + weight_b / v2->position.z + weight_c / v3->position.z;
-                double z = 1.0 / inv_z;
-                if (z > zBuffer[xp + yp * PIXEL_GRID_WIDTH]) {
+                pos.z = 1.0 / inv_z;
+                if (pos.z > zBuffer[xp + yp * PIXEL_GRID_WIDTH]) {
                     continue;
                 }
+
+                double brightness = directional_brightness + point_light_brightness;
+                brightness = adjust_light_levels(brightness);
 
                 // default pink colour
                 unsigned char r = 255;
@@ -140,7 +135,7 @@ void render_clipped_triangle(vertex_t *v1, vertex_t *v2, vertex_t *v3, texture_t
 
                 // Draw the pixel
                 tigrPlot(gScreen, (int) p.x, (int) p.y, tigrRGB((int) (r * brightness), (int) (g * brightness), (int) (b * brightness)));
-                zBuffer[xp + yp * PIXEL_GRID_WIDTH] = z;
+                zBuffer[xp + yp * PIXEL_GRID_WIDTH] = pos.z;
             }
 
         }
