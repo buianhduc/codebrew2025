@@ -240,7 +240,7 @@ void set_view_matrix(vec3_t *p, double x_rotation, double y_rotation)
 mesh_t* convert_from_fast_object_mesh(fastObjMesh obj, mesh_t* mesh) {
     mesh = (mesh_t*)malloc(sizeof(mesh_t));
     mesh->triangle_count = obj.face_count;
-    mesh->triangles = (triangle_t*)malloc(sizeof(mesh));
+    mesh->triangles = (triangle_t*)malloc(sizeof(triangle_t)*obj.face_count);
     mesh->vertex_count = obj.index_count+1;
     mesh->vertices = (vertex_t*) malloc(mesh->vertex_count*sizeof(vertex_t));
     int cnt = 0, cnt2 = 0;
