@@ -1,5 +1,5 @@
 ---
 triple:          'arm64-apple-darwin'
-binary-path:     '/Users/ducbui/Documents/Coding/Codebrew2025/main'
+binary-path:     main
 relocations:     []
 ...

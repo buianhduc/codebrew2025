@@ -249,9 +249,9 @@ mesh_t* convert_from_fast_object_mesh(fastObjMesh obj, mesh_t* mesh) {
         surface_count ++;
         
         vec3_t positions = vec3(
-            (double)obj.positions[(obj.indices[i].p)*(3)],
-            (double)obj.positions[(obj.indices[i].p)*(3)+1],
-            (double)obj.positions[(obj.indices[i].p)*3+2]
+            (double)obj.positions[(obj.indices[i].p)*(3)]*0.1,
+            (double)obj.positions[(obj.indices[i].p)*(3)+1]*0.1,
+            (double)obj.positions[(obj.indices[i].p)*3+2]*0.1
         );
         vec2_t uv = obj.texcoord_count > 1 ? vec2(
             (double)obj.texcoords[(obj.indices[i].t)*(2)],

@@ -75,7 +75,7 @@ void initialize()
 
 	initialize_matrices();
 
-	cube = *load_object_from_file("videoShip.obj", &cube, true);
+	cube = *load_object_from_file("cat.obj", &cube, true);
 	printf("Cube's triangle counts is: %d\n", cube.triangle_count);
 	printf("Cube's vertices counts is: %d\n", cube.vertex_count);
 

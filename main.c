@@ -3,17 +3,17 @@
 #include <stdio.h>
 
 int main() {
-    fastObjMesh* obj = fast_obj_read("kitty.obj");
+    fastObjMesh* obj = fast_obj_read("cat.obj");
     printf("Mesh Face count %u", obj->face_count);
     int cnt = 0, cnt2 = 0;
     int surface_count = 0;
-    for (int i = 0; i < (obj->index_count)+1; i++) {
+    for (int i = 0; i < (obj->index_count); i++) {
         surface_count ++;
         
         printf("Positions %lf %lf %lf\n", 
-            (double)obj->positions[(obj->indices[i].p)*(3)],
-            (double)obj->positions[(obj->indices[i].p)*(3)+1],
-            (double)obj->positions[(obj->indices[i].p)*3+2]
+            (double)obj->positions[(obj->indices[i].p)*(3)]*0.1,
+            (double)obj->positions[(obj->indices[i].p)*(3)+1]*0.1,
+            (double)obj->positions[(obj->indices[i].p)*3+2]*0.1
         );
         printf("Tex %lf %lf\n",
             (double)obj->texcoords[(obj->indices[i].t)*(2)],
