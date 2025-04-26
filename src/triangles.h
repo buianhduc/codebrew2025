@@ -1,6 +1,7 @@
 #ifndef TRIANGLES_H
 #define TRIANGLES_H
 #include "vector_math.h"
+#include "texture.h"
 
 // Vertex in 3D space
 typedef struct {
@@ -23,6 +24,7 @@ typedef struct {
 } mesh_t;
 
 void initialize_matrices();
+void clear_z_buffer();
 
 //use pointers for optimisation 
 static inline triangle_t make_triangle(vertex_t* v1, vertex_t* v2, vertex_t* v3){
@@ -50,8 +52,8 @@ static inline vertex_t make_vertex(vec3_t position, vec2_t textureCoords, vec3_t
 }
 
 void free_mesh(mesh_t *mesh);
-void render_mesh(mesh_t *mesh);
-void render_triangle(triangle_t *tri);
+void render_mesh(mesh_t *mesh, texture_t *texture);
+void render_triangle(triangle_t *tri, texture_t *texture);
 void set_view_matrix(vec3_t *p, double x_rotation, double y_rotation);
 
 

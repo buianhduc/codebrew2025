@@ -2,6 +2,7 @@
 #include "triangles.h"
 #include <stdbool.h>
 #include "cube.h"
+#include "texture.h"
 
 Tigr* window;
 Tigr* gScreen;
@@ -10,7 +11,10 @@ vec3_t camera_position;
 double camera_x_rotation;
 double camera_y_rotation;
 
-mesh_t cube;
+mesh_t cube1;
+mesh_t cube2;
+mesh_t ground;
+texture_t cobblestone;
 
 #include <stdio.h>
 // Runs 60 times per second
@@ -18,30 +22,47 @@ mesh_t cube;
 void tick_state() {
 	vec2_t impulse = vec2(0, 0);
 
-	if (tigrKeyHeld(window, 83)){
+	if (tigrKeyHeld(window, 'S')){
 		impulse.y += 0.01;
-	} else if (tigrKeyHeld( window, 87)){
+	} else if (tigrKeyHeld( window, 'W')){
 		impulse.y -= 0.01;
-	} else if (tigrKeyHeld( window, 68)){
+	}
+	if (tigrKeyHeld(window, 'D')){
 		impulse.x += 0.01;
-	} else if (tigrKeyHeld( window, 65)){
+	} else if (tigrKeyHeld( window, 'A')){
 		impulse.x -= 0.01;
+	}
+
+	double y_add = 0;
+	if (tigrKeyHeld(window, TK_SPACE)) {
+		y_add = 0.01;
+	} else if (tigrKeyHeld(window, TK_SHIFT)) {
+		y_add = -0.01;
 	}
 
 	camera_position.x += impulse.x * cos(camera_y_rotation) + impulse.y * sin(camera_y_rotation);
 	camera_position.z += impulse.y * cos(camera_y_rotation) - impulse.x * sin(camera_y_rotation);
+	camera_position.y += y_add;
 
 	if (tigrKeyHeld(window, TK_LEFT)) {
 		camera_y_rotation += 0.01;
 	} else if (tigrKeyHeld(window, TK_RIGHT)) {
 		camera_y_rotation -= 0.01;
 	}
+	if (tigrKeyHeld(window, TK_UP)) {
+		camera_x_rotation += 0.01;
+	} else if (tigrKeyHeld(window, TK_DOWN)) {
+		camera_x_rotation -= 0.01;
+	}
 }
 
 void render_state() {
+	clear_z_buffer();
 	set_view_matrix(&camera_position, camera_x_rotation, camera_y_rotation);
 
-	render_mesh(&cube);
+	render_mesh(&ground, &cobblestone);
+	render_mesh(&cube1, &cobblestone);
+	render_mesh(&cube2, &cobblestone);
 }
 
 void initialize(){
@@ -51,11 +72,18 @@ void initialize(){
 
 	initialize_matrices();
 
-	cube = make_cube();
+	cube1 = make_cube(vec3(0, 0, 0));
+	cube2 = make_cube(vec3(-3, 0, -2));
+	ground = make_ground();
+
+	load_texture(&cobblestone, "assets/cobblestone.png");
 }
 
 void cleanup() {
-	free_mesh(&cube);
+	free_mesh(&cube1);
+	free_mesh(&cube2);
+	free_mesh(&ground);
+	free_texture(&cobblestone);
 }
 
 int main(int argc, char* argv[]) {

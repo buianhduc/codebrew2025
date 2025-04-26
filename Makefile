@@ -11,5 +11,5 @@ else
 	endif
 endif
 
-renderer : src/*.c include/tigr.c
+renderer : src/*.c include/tigr.c include/lodepng.c
 	gcc $^ -Os -o $@ $(CFLAGS) $(LDFLAGS)

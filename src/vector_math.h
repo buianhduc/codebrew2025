@@ -55,6 +55,10 @@ static inline vec4_t vec4(double x, double y, double z, double w) {
 
 static void normalize(vec3_t *p) {
 	double length = sqrt(p->x * p->x + p->y * p->y + p->z * p->z);
+	if (length == 0) {
+		return;
+	}
+	
 	p->x /= length;
 	p->y /= length;
 	p->z /= length;
@@ -152,6 +156,27 @@ static inline mat4x4_t mat4x4_multiply_mat4x4(mat4x4_t* m, mat4x4_t* p){
 	return results;
 }
 
+static inline vec2_t vec2_interpolate(vec2_t *p0, vec2_t *p1, double pr) {
+	vec2_t result;
+	result.x = p0->x + (p1->x - p0->x) * pr;
+	result.y = p0->y + (p1->y - p0->y) * pr;
+	return result;
+}
 
+static inline vec3_t vec3_interpolate(vec3_t *p0, vec3_t *p1, double pr) {
+	vec3_t result;
+	result.x = p0->x + (p1->x - p0->x) * pr;
+	result.y = p0->y + (p1->y - p0->y) * pr;
+	result.z = p0->z + (p1->z - p0->z) * pr;
+	return result;
+}
+
+static inline vec3_t vec4_interpolate(vec4_t *p0, vec4_t *p1, double pr) {
+	vec3_t result;
+	result.x = p0->x + (p1->x - p0->x) * pr;
+	result.y = p0->y + (p1->y - p0->y) * pr;
+	result.z = p0->z + (p1->z - p0->z) * pr;
+	return result;
+}
 
 #endif
