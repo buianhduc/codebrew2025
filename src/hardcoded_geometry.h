@@ -1,10 +1,10 @@
-#ifndef _CUBE_H
-#define _CUBE_H
+#ifndef _HARDCODED_GEOMETRY_H
+#define _HARDCODED_GEOMETRY_H
 
 #include "triangles.h"
 #include <stdlib.h>
 
-static inline mesh_t make_cube(vec3_t center) {
+static inline mesh_t make_cube() {
     mesh_t mesh;
 	mesh.vertex_count = 5*4;
 	mesh.triangle_count = 5*2;
@@ -121,12 +121,6 @@ static inline mesh_t make_cube(vec3_t center) {
         vec2(1, 0),
         vec3(0, 1, 0)
     );
-
-    for (int i = 0; i < mesh.vertex_count; i++) {
-        mesh.vertices[i].position.x += center.x;
-        mesh.vertices[i].position.y += center.y;
-        mesh.vertices[i].position.z += center.z;
-    }
 
     mesh.triangles[0] = make_triangle(&mesh.vertices[0], &mesh.vertices[1], &mesh.vertices[2]);
     mesh.triangles[1] = make_triangle(&mesh.vertices[2], &mesh.vertices[3], &mesh.vertices[0]);

@@ -38,6 +38,7 @@
     "vector": "c",
     "complex": "c",
     "triangles.h": "c",
-    "vector_math.h": "c"
+    "vector_math.h": "c",
+    "obj_loader.h": "c"
   }
 }

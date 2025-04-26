@@ -51,9 +51,8 @@ static inline vertex_t make_vertex(vec3_t position, vec2_t textureCoords, vec3_t
 	return v;
 }
 
-void free_mesh(mesh_t *mesh);
-void render_mesh(mesh_t *mesh, texture_t *texture);
-void render_triangle(triangle_t *tri, texture_t *texture);
+void render_mesh(mesh_t *mesh, texture_t *texture, vec3_t pos, vec3_t rotation);
+void render_triangle(triangle_t *tri, mat4x4_t *model_matrix, texture_t *texture);
 void set_view_matrix(vec3_t *p, double x_rotation, double y_rotation);
 
 

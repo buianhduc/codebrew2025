@@ -32,14 +32,18 @@ void initialize_rendering() {
     load_identity(&view_matrix);
 }
 
-void free_mesh(mesh_t *mesh) {
-    free(mesh->vertices);
-    free(mesh->triangles);
-}
+void render_mesh(mesh_t *mesh, texture_t *texture, vec3_t pos, vec3_t rotation) {
+    mat4x4_t translate = make_translation_matrix(pos);
+    mat4x4_t rotate_x = make_rotation_matrix_x(rotation.x);
+    mat4x4_t rotate_y = make_rotation_matrix_y(rotation.y);
+    mat4x4_t rotate_z = make_rotation_matrix_z(rotation.z);
+    
+    mat4x4_t model_matrix = mat4x4_multiply_mat4x4(&rotate_y, &rotate_z);
+    model_matrix = mat4x4_multiply_mat4x4(&rotate_x, &model_matrix);
+    model_matrix = mat4x4_multiply_mat4x4(&translate, &model_matrix);
 
-void render_mesh(mesh_t *mesh, texture_t *texture) {
     for (unsigned int i = 0; i < mesh->triangle_count; i++) {
-        render_triangle(&mesh->triangles[i], texture);
+        render_triangle(&mesh->triangles[i], &model_matrix, texture);
     }
 }
 
@@ -69,12 +73,12 @@ void render_clipped_triangle(vertex_t *v1, vertex_t *v2, vertex_t *v3, texture_t
     double y_max = max3(A.y, B.y, C.y);
     
     x_min = x_min < 0 ? 0 : x_min;
-    x_max = x_max >= PIXEL_GRID_WIDTH ? PIXEL_GRID_WIDTH : x_max;
+    x_max = x_max >= PIXEL_GRID_WIDTH ? PIXEL_GRID_WIDTH-1 : x_max;
     y_min = y_min < 0 ? 0 : y_min;
-    y_max = y_max >= PIXEL_GRID_HEIGHT ? PIXEL_GRID_HEIGHT : y_max;
+    y_max = y_max >= PIXEL_GRID_HEIGHT ? PIXEL_GRID_HEIGHT-1 : y_max;
 
-    for (p.y = y_min; p.y < y_max; p.y++) {
-        for (p.x = x_min; p.x < x_max; p.x++) {
+    for (p.y = y_min; p.y <= y_max; p.y++) {
+        for (p.x = x_min; p.x <= x_max; p.x++) {
             double BCP = triangle_signed_area(B, C, p);
             double CAP = triangle_signed_area(C, A, p);
             double ABP = triangle_signed_area(A, B, p);
@@ -110,9 +114,9 @@ void render_clipped_triangle(vertex_t *v1, vertex_t *v2, vertex_t *v3, texture_t
                 double brightness = directional_brightness + point_light_brightness;
                 brightness = adjust_light_levels(brightness);
 
-                // default pink colour
-                unsigned char r = 255;
-                unsigned char g = 0;
+                // default colour
+                unsigned char r = 144;
+                unsigned char g = 213;
                 unsigned char b = 255;
 
                 if (texture != NULL) {
@@ -144,9 +148,10 @@ void render_clipped_triangle(vertex_t *v1, vertex_t *v2, vertex_t *v3, texture_t
 
 #include <stdbool.h>
 
-void render_triangle(triangle_t *tri, texture_t *texture){
+void render_triangle(triangle_t *tri, mat4x4_t *model_matrix, texture_t *texture){
 
-    mat4x4_t transformation = mat4x4_multiply_mat4x4(&projection_matrix, &view_matrix);
+    mat4x4_t transformation = mat4x4_multiply_mat4x4(&view_matrix, model_matrix);
+    transformation = mat4x4_multiply_mat4x4(&projection_matrix, &transformation);
 
     //get position of the vertices on screen 
     vec4_t p1 = mat4x4_multiply(&transformation,
