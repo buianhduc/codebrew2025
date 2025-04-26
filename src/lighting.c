@@ -14,7 +14,7 @@ void initialize_lighting() {
 // get brightness of sun on this surface normal
 double apply_directional_light(vec3_t surface_normal) {
     double dot = -sun.direction.x * surface_normal.x - sun.direction.y * surface_normal.y - sun.direction.z * surface_normal.z;
-    double brightness = dot < 0.25 ? 0.25 : dot;
+    double brightness = dot < 0.5 ? 0.5 : dot;
     brightness = brightness > 1 ? 1 : brightness;
     return brightness;
 }
