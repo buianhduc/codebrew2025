@@ -1,4 +1,4 @@
-CFLAGS += -Iinclude
+CFLAGS += -Iinclude -Wall -g
 
 ifeq ($(OS),Windows_NT)
 	LDFLAGS += -s -lopengl32 -lgdi32
@@ -12,4 +12,4 @@ else
 endif
 
 renderer : src/*.c include/tigr.c
-	gcc $^ -Os -o $@ $(CFLAGS) $(LDFLAGS)
+	gcc $^ -o $@ $(CFLAGS) $(LDFLAGS)

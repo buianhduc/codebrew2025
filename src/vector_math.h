@@ -53,6 +53,13 @@ static inline vec4_t vec4(double x, double y, double z, double w) {
 	return p;
 }
 
+static void normalize(vec3_t *p) {
+	double length = sqrt(p->x * p->x + p->y * p->y + p->z * p->z);
+	p->x /= length;
+	p->y /= length;
+	p->z /= length;
+}
+
 static inline vec4_t vec4_position(vec3_t *pos) {
 	vec4_t p4;
 	p4.x = pos->x;
@@ -84,7 +91,7 @@ static inline mat4x4_t make_projection_matrix(double aspect, double fov, double 
     mat4x4_t m;
     m.v1 = vec4(1.0 / (aspect * tan(fov/2)), 0, 0, 0);
     m.v2 = vec4(0, 1.0/tan(fov/2), 0, 0);
-    m.v3 = vec4(0, 0, (z_far + z_near) / (z_far - z_near), -1);
+    m.v3 = vec4(0, 0, -(z_far + z_near) / (z_far - z_near), -1);
     m.v4 = vec4(0, 0, (2 * z_far * z_near) / (z_far - z_near), 0);
     return m;
 }
@@ -111,7 +118,7 @@ static inline mat4x4_t make_rotation_matrix_y(double theta){
 	mat4x4_t m;
     m.v1 = vec4(cos(theta), 0, -sin(theta) , 0);
     m.v2 = vec4(0, 1, 0 , 0);
-    m.v3 = vec4(-sin(theta), 0, cos(theta), 0);
+    m.v3 = vec4(sin(theta), 0, cos(theta), 0);
     m.v4 = vec4(0, 0, 0, 1);
     return m;
 }

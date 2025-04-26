@@ -36,6 +36,7 @@
         "utility": "c",
         "variant": "c",
         "vector": "c",
-        "complex": "c"
+        "complex": "c",
+        "cstdio": "c"
     }
 }
